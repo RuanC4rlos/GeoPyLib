@@ -90,15 +90,14 @@ class Main( QMainWindow, UiMain ):
 
         self.tela_extrato.pushButton_sair.clicked.connect( self.TelaVoltar)
 
-    def cria_conec(self):
-        ip = '192.168.56.1'
-        port = 1234
-        addr = ((ip, port))  # define a tupla de endereco
-        client_socket = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
-        client_socket.connect( addr )  # realia aa conexao
-        return client_socket
-
     def concatenar_operacao(self, operacao):
+        """
+        Concatena os elementos separando por virgulas
+        :param operacao: str
+            id da requisicao, componenetes necessarios(nome,senha,etc)
+        :return:
+            operacao modificada
+        """
         trasacao = ''
 
         for i in operacao:
@@ -107,6 +106,12 @@ class Main( QMainWindow, UiMain ):
         return trasacao
 
     def botaoLogin(self):
+        """
+        Verifica se o cliente esta cadastrado no banco de dados
+        Funcao principal para entrar na aplicação
+        :return:
+            None
+        """
         senha = self.tela_login.lineEdit_password.text()
         nome = self.tela_login.lineEdit_user.text()
         if nome != '' and senha != '':
@@ -130,14 +135,17 @@ class Main( QMainWindow, UiMain ):
 
 
     def botaoRegister(self):
-
+        """
+        Verifica se o cliente esta registrado no banco de dados
+        Função cria novos usuarios
+        :return: None
+        """
         nome = self.tela_registrar.lineEdit_nome.text()
         cpf = self.tela_registrar.lineEdit_cpf.text()
         nascimento = self.tela_registrar.lineEdit_nascimento.text()
         senha = self.tela_registrar.lineEdit_password.text()
 
         if nome != '' and cpf != '' and nascimento != '' and senha != '':
-            #client_socket = self.cria_conec()  # realia aa conexao
             mensagem = self.conectar_servidor.envia(self.concatenar_operacao( ['1', nome, cpf, nascimento, senha] ) )
             if mensagem[0] =='cadastrado':
                 QMessageBox.information( None, 'Cadastro', 'Usuario Cadastrado!')
@@ -150,12 +158,24 @@ class Main( QMainWindow, UiMain ):
         else:
             QMessageBox.information( None, 'mensagem', 'Preencha todos os dados' )
     def mostrar_conta(self,cliente):
-        #client_socket = self.cria_conec()  # realia aa conexao
+        """
+        Mostra informações no layout da aplicação
+        :param cliente:
+            nome do cliente
+        :return:
+            id de requisicao da operacao
+        """
         mensagem = self.conectar_servidor.envia(self.concatenar_operacao( ['3', cliente] ))
         return mensagem[0]
 
     def AttSaldo(self,cliente):
-        #client_socket = self.cria_conec()  # realia aa conexao
+        """
+        Atualiza o saldo no layout da aplicação em varia telas
+        :param cliente:
+            nome do cliente
+        :return:
+            None
+        """
         mensagem = self.conectar_servidor.envia(self.concatenar_operacao( ['5', cliente] ))
         saldo = mensagem[0]
         if saldo!='0.0':
@@ -166,6 +186,12 @@ class Main( QMainWindow, UiMain ):
         self.tela_transferir.lineEdit_saldo.setText( saldo )
 
     def TelaMenu(self,cliente):
+        """
+        Tela menu com as informações e botoes da aplicação
+        :param cliente:
+            nome do cliente
+        :return: None
+        """
         self.QtStack.setCurrentIndex( 2 )
         numero = self.mostrar_conta(cliente)
         self.AttSaldo(cliente)
@@ -182,6 +208,10 @@ class Main( QMainWindow, UiMain ):
         self.tela_transferir.lineEdit_numero.setText( numero )
 
     def botaoVoltar(self):
+        """
+        Botao que volta para a tela login, limpando as lineEdit da tela registrar
+        :return: None
+        """
         self.tela_registrar.lineEdit_nome.setText( '' )
         self.tela_registrar.lineEdit_cpf.setText( '' )
         self.tela_registrar.lineEdit_nascimento.setText( '' )
@@ -189,28 +219,42 @@ class Main( QMainWindow, UiMain ):
         self.QtStack.setCurrentIndex( 0 )
 
     def TelaRegister(self):
+        """
+        Chama a tela registrar
+        """
         self.QtStack.setCurrentIndex( 1 )
 
     def TelaSair(self):
+        """
+            Chama a tela login
+        """
         self.QtStack.setCurrentIndex( 0 )
 
     def TelaSacar(self):
+        """
+            Chama a tela sacar
+        """
         self.QtStack.setCurrentIndex( 3 )
 
     def TelaDepositar(self):
+        """
+            Chama a tela depositar
+        """
         self.QtStack.setCurrentIndex( 4 )
 
     def TelaTransferir(self):
+        """
+            Chama a tela transferir
+        """
         self.QtStack.setCurrentIndex( 5 )
-
-    def remove_A_P(self,lista):
-        return [item.strip( '"()' ) for item in lista]
 
 
     def TelaExtrato(self):
+        """
+        Chama a tela extrato, conecta com o servidor e faz a requisição do extrato no banco de dados
+        """
         self.QtStack.setCurrentIndex( 6 )
         global nm
-        #client_socket = self.cria_conec()  # realia aa conexao
         mensagem = self.conectar_servidor.envia(self.concatenar_operacao( ['6',nm] ))
         recebe = mensagem
 
@@ -227,15 +271,19 @@ class Main( QMainWindow, UiMain ):
         self.tela_extrato.textBrowser.setText(recebe)
 
     def TelaVoltar(self):
+        """Retorna a tela menu"""
         cliente = self.tela_depositar.lineEdit_cliente.text()
         self.TelaMenu(cliente)
 
     def botaoSacar(self):
+        """
+        Faz uma requisicao para o servidor enviando o id e dados necessarios para realizar o saque do cliente
+         Recebe uma confirmacao do servidor se deu certo ou nao
+        """
         valor = self.tela_sacar.lineEdit_saldo.text()
         numero = self.tela_sacar.lineEdit_numero.text()
         cliente = self.tela_sacar.lineEdit_cliente.text()
         if valor != '':
-            #client_socket = self.cria_conec()  # realia aa conexao
             mensagem = self.conectar_servidor.envia(self.concatenar_operacao( ['7', numero, valor, cliente] ))
             recebe = mensagem[0]
             if recebe == 'sacado':
@@ -249,11 +297,14 @@ class Main( QMainWindow, UiMain ):
 
 
     def botaoDepositar(self):
+        """
+        Faz uma requisicao para o servidor enviando o id e dados necessarios para realizar o deposito na conta do cliente
+        Recebe uma confirmacao do servidor se deu certo ou nao
+        """
         valor = self.tela_depositar.lineEdit_valor.text()
         numero = self.tela_depositar.lineEdit_numero.text()
         cliente = self.tela_depositar.lineEdit_cliente.text()
         if valor != '':
-            #client_socket = self.cria_conec()  # realia aa conexao
             mensagem = self.conectar_servidor.envia(self.concatenar_operacao( ['4', numero, valor,cliente] ))
             recebe = mensagem[0]
             if recebe == 'depositado':
@@ -264,11 +315,14 @@ class Main( QMainWindow, UiMain ):
             QMessageBox.information( None, 'mensagem', 'Digite um valor!' )
 
     def botaoTransferir(self):
+        """
+        Faz uma requisicao para o servidor enviando o id e dados necessarios para realizar uma transferencia da conta do cliente
+        Recebe uma mensagem do servidor se deu certo ou nao
+        """
         valor = self.tela_transferir.lineEdit_transf_destino.text()
         numero = self.tela_transferir.lineEdit_numero_destino.text()
         cliente = self.tela_transferir.lineEdit_cliente.text()
         if valor != '':
-            #client_socket = self.cria_conec()  # realia aa conexao
             mensagem = self.conectar_servidor.envia(self.concatenar_operacao( ['8', numero, valor, cliente] ))
             recebe = mensagem[0]
             if recebe == 'transferido':
@@ -288,7 +342,9 @@ class Main( QMainWindow, UiMain ):
         self.tela_transferir.lineEdit_numero_destino.setText( '' )
         self.tela_transferir.lineEdit_transf_destino.setText( '' )
     def TelaFechar(self):
-        #client_socket = self.cria_conec()  # realia aa conexao
+        """
+        Solicita ao servidor o fechamento da conexão
+        """
         mensagem = 'encerrar'
         mensagem = self.conectar_servidor.envia(mensagem)
         print(mensagem[0])

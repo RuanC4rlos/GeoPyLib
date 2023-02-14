@@ -1,14 +1,29 @@
 import socket
 
 class Conectar:
+    """
+    A class representa um cliente criando uma conexão com servidor
+    """
     def __init__(self):
+        """
+        Construtor com atributos necessario para criar conexão com o servidor
+        """
         self.ip = 'localhost' #definindo o endereço
         self.porta = 8006 #definindo o número de porta
         self.conectado = False
         self.cliente_socket = None
 
     def envia(self, msg):
-        """Lida com o envio de mensagens"""
+        """
+        Lida com o envio de mensagens
+            Attributes:
+                msg : str
+                mensagem enviada ao servidor
+            Returns :
+                retorna o fechamento da aplicação
+            ou
+                retorna a mensagem enviada do servidor
+        """
 
         if self.conectado == False:
             try:
