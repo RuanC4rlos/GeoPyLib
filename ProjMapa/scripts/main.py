@@ -7,7 +7,10 @@ from tela_mapa import Tela_mapa
 from tela_main import Tela_main
 from tela_marcador import Tela_marcador
 from tela_calc_dist import Tela_calc_dist
-from Classes import Map, Coordinate
+from tela_dados_meteoro import Tela_dados_meteoro
+from tela_conversor import Tela_conversor
+
+from Classes import Map, Coordinate, Location, OSMGeocoder
 import webbrowser
 
 class UiMain( QtWidgets.QWidget ):
@@ -21,6 +24,8 @@ class UiMain( QtWidgets.QWidget ):
         self.stack1 = QtWidgets.QMainWindow()
         self.stack2 = QtWidgets.QMainWindow()
         self.stack3 = QtWidgets.QMainWindow()
+        self.stack4 = QtWidgets.QMainWindow()
+        self.stack5 = QtWidgets.QMainWindow()
 
         self.tela_main = Tela_main()
         self.tela_main.setupUi( (self.stack0) )
@@ -34,10 +39,18 @@ class UiMain( QtWidgets.QWidget ):
         self.tela_calc_dist = Tela_calc_dist()
         self.tela_calc_dist.setupUi((self.stack3))
 
+        self.tela_dados_meteoro = Tela_dados_meteoro()
+        self.tela_dados_meteoro.setupUi((self.stack4))
+
+        self.tela_conversor = Tela_conversor()
+        self.tela_conversor.setupUi((self.stack5))
+
         self.QtStack.addWidget( self.stack0 )
         self.QtStack.addWidget( self.stack1 )
         self.QtStack.addWidget( self.stack2 )
         self.QtStack.addWidget( self.stack3 )
+        self.QtStack.addWidget( self.stack4 )
+        self.QtStack.addWidget( self.stack5 )
 
 class Main( QMainWindow, UiMain ):
     
@@ -50,7 +63,9 @@ class Main( QMainWindow, UiMain ):
 
         self.tela_main.pushButton_mapa.clicked.connect( self.voltar_mapa )
         self.tela_main.pushButton_calc_dist.clicked.connect(self.MostrarTela_calc_dist)
-        
+        self.tela_main.pushButton_dados_met.clicked.connect(self.MostraTela_dados_meteoro)
+        self.tela_main.pushButton_conversor.clicked.connect(self.MostrarTela_conversor)
+
         self.tela_mapa.pushButton_ver_map.clicked.connect(self.visualizar_mapa)
         self.tela_mapa.pushButton_add_marc.clicked.connect(self.Tela_marcador)
         self.tela_mapa.pushButton_voltar.clicked.connect(self.TelaMain)
@@ -60,6 +75,13 @@ class Main( QMainWindow, UiMain ):
         
         self.tela_calc_dist.pushButton_calc.clicked.connect(self.calcular_distancia)
         self.tela_calc_dist.pushButton_voltar.clicked.connect(self.TelaMain)
+
+        self.tela_dados_meteoro.pushButton_busc_dados.clicked.connect(self.buscar_dados_meteoro)
+        self.tela_dados_meteoro.pushButton_voltar.clicked.connect(self.Voltar_dados_metero)
+
+        self.tela_conversor.pushButton_conv_End.clicked.connect(self.converter_endereco)
+        self.tela_conversor.pushButton_conv_Coord.clicked.connect(self.converter_coordenadas)
+        self.tela_conversor.pushButton_voltar.clicked.connect(self.Voltar_converter)
 
     def salva_html(self,mapa):
          # salva o mapa em um arquivo HTML
@@ -145,12 +167,82 @@ class Main( QMainWindow, UiMain ):
             dist = int(dist)
             self.tela_calc_dist.lineEdit_result.setText(str(dist)+' km')
         else:
-            QMessageBox.information( None, 'Mensagem', 'Preencha os campos as informações!')            
-            lat_A = self.tela_calc_dist.lineEdit_lat_A.setText('')
-            lon_A = self.tela_calc_dist.lineEdit_lon_A.setText('')
-            lat_B = self.tela_calc_dist.lineEdit_lat_B.setText('')
-            lon_B = self.tela_calc_dist.lineEdit_lon_B.setText('')
+            QMessageBox.information( None, 'Mensagem', 'Preencha as informações!')            
+            self.tela_calc_dist.lineEdit_lat_A.setText('')
+            self.tela_calc_dist.lineEdit_lon_A.setText('')
+            self.tela_calc_dist.lineEdit_lat_B.setText('')
+            self.tela_calc_dist.lineEdit_lon_B.setText('')
 
+    def buscar_dados_meteoro(self):
+        lat = self.tela_dados_meteoro.lineEdit_lat.text()
+        lon = self.tela_dados_meteoro.lineEdit_lon.text()
+        cidade = self.tela_dados_meteoro.lineEdit_cidade.text()
+        endereco = self.tela_dados_meteoro.lineEdit_endere.text()
+        if lat!='' and lon!='' and cidade!='' and endereco!='':
+            self.busc = Location(cidade, endereco, float(lat),float(lon))
+            # obtém as informações meteorológicas para a cidade de Nova York
+            self.busc.set_weather('1fad30734db859e67fe4b73213276fbf',lat ,lon)
+            self.tela_dados_meteoro.lineEdit_tempe.setText(str(self.busc.temperature)+' °C')
+            self.tela_dados_meteoro.lineEdit_umidad.setText(str(self.busc.humidity)+'%')
+            self.tela_dados_meteoro.lineEdit_pressao.setText(str(self.busc.pressure)+' hPa')
+            self.tela_dados_meteoro.lineEdit_lat.setText('')
+            self.tela_dados_meteoro.lineEdit_lon.setText('')
+            self.tela_dados_meteoro.lineEdit_cidade.setText('')
+            self.tela_dados_meteoro.lineEdit_endere.setText('')
+        else:
+            QMessageBox.information( None, 'Mensagem', 'Preencha as informações!')            
+            
+
+    def Voltar_dados_metero(self):
+        self.QtStack.setCurrentIndex( 0 )
+        self.tela_dados_meteoro.lineEdit_lat.setText('')
+        self.tela_dados_meteoro.lineEdit_lon.setText('')
+        self.tela_dados_meteoro.lineEdit_cidade.setText('')
+        self.tela_dados_meteoro.lineEdit_endere.setText('')
+        self.tela_dados_meteoro.lineEdit_tempe.setText('')
+        self.tela_dados_meteoro.lineEdit_umidad.setText('')
+        self.tela_dados_meteoro.lineEdit_pressao.setText('')
+
+    def Voltar_converter(self):
+        self.QtStack.setCurrentIndex( 0 )
+        self.tela_conversor.lineEdit_enderc_Coord.setText('')
+        self.tela_conversor.lineEdit_endere_E.setText('')
+        self.tela_conversor.lineEdit_lat_C.setText('')
+        self.tela_conversor.lineEdit_lat_E.setText('')
+        self.tela_conversor.lineEdit_lon_C.setText('')
+        self.tela_conversor.lineEdit_lon_E.setText('')
+    
+    def converter_endereco(self):
+        geocoder = OSMGeocoder()
+        endereco = self.tela_conversor.lineEdit_endere_E.text()
+        if endereco!='':
+            coordinates = geocoder.geocode(endereco)
+            self.tela_conversor.lineEdit_lat_E.setText(str(coordinates[0]))
+            self.tela_conversor.lineEdit_lon_E.setText(str(coordinates[1]))
+
+            self.tela_conversor.lineEdit_endere_E.setText('')
+        else:
+            QMessageBox.information( None, 'Mensagem', 'Preencha o enderço!')            
+            
+    def converter_coordenadas(self):
+        geocoder = OSMGeocoder()
+        lat = self.tela_conversor.lineEdit_lat_C.text()
+        lon = self.tela_conversor.lineEdit_lon_C.text()
+        if lat!='' and lon!='':
+            address = geocoder.reverse_geocode(lat, lon)
+            
+            address=str(address)
+            address = address.replace('(','')
+            address = address.replace(')','')
+            address = address.replace( "'", '' )
+            
+            self.tela_conversor.lineEdit_enderc_Coord.setText(str(address))
+
+            self.tela_conversor.lineEdit_lat_C.setText('')
+            self.tela_conversor.lineEdit_lon_C.setText('')
+        else:
+            QMessageBox.information( None, 'Mensagem', 'Preencha as informações!')            
+            
     def TelaMain(self):
         self.QtStack.setCurrentIndex( 0 )
 
@@ -161,6 +253,12 @@ class Main( QMainWindow, UiMain ):
 
     def MostrarTela_calc_dist(self):
         self.QtStack.setCurrentIndex(3)
+
+    def MostraTela_dados_meteoro(self):
+        self.QtStack.setCurrentIndex(4)
+
+    def MostrarTela_conversor(self):
+        self.QtStack.setCurrentIndex(5)
 
 if __name__ == '__main__':
     app = QApplication( sys.argv )
