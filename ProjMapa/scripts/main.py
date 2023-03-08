@@ -77,14 +77,20 @@ class Main( QMainWindow, UiMain ):
         self.tela_calc_dist.pushButton_voltar.clicked.connect(self.TelaMain)
 
         self.tela_dados_meteoro.pushButton_busc_dados.clicked.connect(self.buscar_dados_meteoro)
-        self.tela_dados_meteoro.pushButton_voltar.clicked.connect(self.Voltar_dados_metero)
+        self.tela_dados_meteoro.pushButton_voltar.clicked.connect(self.Voltar_dados_meteoro)
 
         self.tela_conversor.pushButton_conv_End.clicked.connect(self.converter_endereco)
         self.tela_conversor.pushButton_conv_Coord.clicked.connect(self.converter_coordenadas)
         self.tela_conversor.pushButton_voltar.clicked.connect(self.Voltar_converter)
 
     def salva_html(self,mapa):
-         # salva o mapa em um arquivo HTML
+        """
+        Salva o mapa em um arquivo HTML
+        :param mapa: 
+            objeto da biblioteca folium
+        :return: 
+            None
+        """
         with open('mapa.html', 'w') as f:
             f.write(mapa.show().get_root().render())
             f.write('''
@@ -95,6 +101,13 @@ class Main( QMainWindow, UiMain ):
                 </script>
                 ''')
     def visualizar_mapa(self):
+        """
+        Abre automaticamente o arquivo HTML em uma janela do navegador mostrando o mapa
+        :param: 
+            None
+        :return:
+            None
+        """
         self.QtStack.setCurrentIndex( 1 )
         lat = self.tela_mapa.lineEdit_lat.text()
         lon = self.tela_mapa.lineEdit_lon.text()
@@ -106,7 +119,7 @@ class Main( QMainWindow, UiMain ):
                 self.salva_html(mapa)
             else:
                 cont=0
-            # abre automaticamente o arquivo HTML em uma janela do navegador
+            
             webbrowser.open('mapa.html')
             self.tela_mapa.lineEdit_lat.setText( '' )
             self.tela_mapa.lineEdit_lon.setText( '' )
@@ -118,6 +131,13 @@ class Main( QMainWindow, UiMain ):
             self.tela_mapa.lineEdit_zoom.setText( '' )
 
     def adicionar_marcador(self):
+        """
+        Adiciona um marcador no mapa
+        :param:
+            None
+        :return:
+            None    
+        """
         self.QtStack.setCurrentIndex( 2 )
         lat = self.tela_marcador.lineEdit_lat.text()
         lon = self.tela_marcador.lineEdit_lon.text()
@@ -145,6 +165,19 @@ class Main( QMainWindow, UiMain ):
             QMessageBox.information( None, 'Mensagem', 'Digite as informações!')
 
     def retorFloat(self,valor1,valor2,valor3,valor4):
+        """
+        Modifica o type dos valores de str para float
+        :param valor1:
+            valor1 str
+        :param valor2:
+            valor2 str
+        :param valor3:
+            valor3 str
+        :param valor4:
+            valor4 str
+        :return:
+            Os valores em float(valor1,valor2,valor3,valor4)
+        """
         valor1= float(valor1)
         valor2= float(valor2)
         valor3= float(valor3)
@@ -152,6 +185,13 @@ class Main( QMainWindow, UiMain ):
         return valor1,valor2,valor3,valor4
 
     def calcular_distancia(self):
+        """
+        Calcula a distancia de duas coordenadas
+        :param:
+            None
+        :return:
+            None
+        """
         lat_A = self.tela_calc_dist.lineEdit_lat_A.text()
         lon_A = self.tela_calc_dist.lineEdit_lon_A.text()
         
@@ -174,6 +214,13 @@ class Main( QMainWindow, UiMain ):
             self.tela_calc_dist.lineEdit_lon_B.setText('')
 
     def buscar_dados_meteoro(self):
+        """
+        Busca dados meteorologicos como temperatura, umidade e pressão de uma api usando o serviço OpenStreetMap Nominatim
+        :param:
+            None
+        :return:
+            None
+        """
         lat = self.tela_dados_meteoro.lineEdit_lat.text()
         lon = self.tela_dados_meteoro.lineEdit_lon.text()
         cidade = self.tela_dados_meteoro.lineEdit_cidade.text()
@@ -193,7 +240,14 @@ class Main( QMainWindow, UiMain ):
             QMessageBox.information( None, 'Mensagem', 'Preencha as informações!')            
             
 
-    def Voltar_dados_metero(self):
+    def Voltar_dados_meteoro(self):
+        """
+        Sai da tela de buscar dados meteorologicos e retorna para tela principal 
+        :param:
+            None
+        :return:
+            None
+        """
         self.QtStack.setCurrentIndex( 0 )
         self.tela_dados_meteoro.lineEdit_lat.setText('')
         self.tela_dados_meteoro.lineEdit_lon.setText('')
@@ -204,6 +258,13 @@ class Main( QMainWindow, UiMain ):
         self.tela_dados_meteoro.lineEdit_pressao.setText('')
 
     def Voltar_converter(self):
+        """
+        Sai da tela de converter coordenadas e retorna para tela principal 
+        :param:
+            None
+        :return:
+            None
+        """
         self.QtStack.setCurrentIndex( 0 )
         self.tela_conversor.lineEdit_enderc_Coord.setText('')
         self.tela_conversor.lineEdit_endere_E.setText('')
@@ -213,6 +274,13 @@ class Main( QMainWindow, UiMain ):
         self.tela_conversor.lineEdit_lon_E.setText('')
     
     def converter_endereco(self):
+        """
+        Converte um determinado endereço em coordenadas latitude e longitude usando uma api com serviços do OpenStreetMap Nominatim
+        :param:
+            None
+        :return:
+            None
+        """
         geocoder = OSMGeocoder()
         endereco = self.tela_conversor.lineEdit_endere_E.text()
         if endereco!='':
@@ -225,6 +293,13 @@ class Main( QMainWindow, UiMain ):
             QMessageBox.information( None, 'Mensagem', 'Preencha o enderço!')            
             
     def converter_coordenadas(self):
+        """
+        Converte coordenadas latitude e longitude em um determinado endereço, com uma api que usa o serviço OpenStreetMap Nominatim
+        :param:
+            None
+        :return:
+            None
+        """
         geocoder = OSMGeocoder()
         lat = self.tela_conversor.lineEdit_lat_C.text()
         lon = self.tela_conversor.lineEdit_lon_C.text()
@@ -244,20 +319,63 @@ class Main( QMainWindow, UiMain ):
             QMessageBox.information( None, 'Mensagem', 'Preencha as informações!')            
             
     def TelaMain(self):
+        """
+        Volta para tela principal do sistema
+        :param:
+            None
+        :return:
+            None
+        """
         self.QtStack.setCurrentIndex( 0 )
 
     def voltar_mapa(self):
+        """
+        Abre uma tela de visualizar o mapa
+        :param:
+            None
+        :return:
+            None
+        """
         self.QtStack.setCurrentIndex( 1 )
+
     def Tela_marcador(self):
+        """
+        Abre uma tela para adicionar marcadores
+        :param:
+            None
+        :return:
+            None
+        """
         self.QtStack.setCurrentIndex(2)
 
     def MostrarTela_calc_dist(self):
+        """
+        Abre uma tela para calcular a distancia entre coordenadas
+        :param:
+            None
+        :return:
+            None
+        """
         self.QtStack.setCurrentIndex(3)
 
     def MostraTela_dados_meteoro(self):
+        """
+        Abre uma tela para buscar dados meteorologicos
+        :param:
+            None
+        :return:
+            None
+        """
         self.QtStack.setCurrentIndex(4)
 
     def MostrarTela_conversor(self):
+        """
+        Abre uma tela para converter endereços em coordenadas e vice-versa
+        :param:
+            None
+        :return:
+            None
+        """
         self.QtStack.setCurrentIndex(5)
 
 if __name__ == '__main__':
