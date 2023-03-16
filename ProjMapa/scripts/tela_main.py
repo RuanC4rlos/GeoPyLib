@@ -157,7 +157,7 @@ class Tela_main(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Login"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "GeoPyLib"))
         self.pushButton_conversor.setText(_translate("MainWindow", "Conversor de Coordenadas"))
         self.label.setText(_translate("MainWindow", "GeoPyLib"))
         self.pushButton_dados_met.setText(_translate("MainWindow", "Dados Meterologicos"))

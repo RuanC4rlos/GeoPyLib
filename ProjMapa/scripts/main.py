@@ -1,3 +1,4 @@
+import re
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QDesktopServices
@@ -212,7 +213,7 @@ class Main( QMainWindow, UiMain ):
             self.tela_calc_dist.lineEdit_lon_A.setText('')
             self.tela_calc_dist.lineEdit_lat_B.setText('')
             self.tela_calc_dist.lineEdit_lon_B.setText('')
-
+    
     def buscar_dados_meteoro(self):
         """
         Busca dados meteorologicos como temperatura, umidade e pressão de uma api usando o serviço OpenStreetMap Nominatim
@@ -225,7 +226,13 @@ class Main( QMainWindow, UiMain ):
         lon = self.tela_dados_meteoro.lineEdit_lon.text()
         cidade = self.tela_dados_meteoro.lineEdit_cidade.text()
         endereco = self.tela_dados_meteoro.lineEdit_endere.text()
-        if lat!='' and lon!='' and cidade!='' and endereco!='':
+        if lat!='' and lon!='' or cidade!='' and endereco!='':
+            if lat=='' and lon=='':
+                geocoder = OSMGeocoder()
+                coordinates = geocoder.geocode(cidade+','+endereco)
+                lat = (str(coordinates[0]))
+                lon=(str(coordinates[1]))
+        
             self.busc = Location(cidade, endereco, float(lat),float(lon))
             # obtém as informações meteorológicas para a cidade de Nova York
             self.busc.set_weather('1fad30734db859e67fe4b73213276fbf',lat ,lon)
@@ -310,9 +317,10 @@ class Main( QMainWindow, UiMain ):
             address = address.replace('(','')
             address = address.replace(')','')
             address = address.replace( "'", '' )
-            
-            self.tela_conversor.lineEdit_enderc_Coord.setText(str(address))
-
+            if address != 'None, None':
+                self.tela_conversor.lineEdit_enderc_Coord.setText(str(address))
+            else:
+                 QMessageBox.information( None, 'Mensagem', 'Endereço não encontrado!')    
             self.tela_conversor.lineEdit_lat_C.setText('')
             self.tela_conversor.lineEdit_lon_C.setText('')
         else:
